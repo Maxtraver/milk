@@ -63,25 +63,22 @@ export const NewAcceptance: React.FC = () => {
     quantity: number
     transactionType: 'Доходы' | 'Расходы'
   }) => {
-    const newPositionNumber = receptionData.length > 0
-      ? Math.max(...receptionData.map(item => item.positionNumber)) + 1
+    if (receptionData.length === 0) {
+      setErrorMessage('Невозможно добавить группу работ. Сначала загрузите данные о приемке.')
+      setShowAddServiceModal(false)
+      setCurrentGroupName('')
+      return
+    }
+
+    const existingPositionNumber = receptionData.length > 0
+      ? receptionData[0].positionNumber
       : 1
 
-    const receptionDate = receptionData.length > 0
-      ? receptionData[0].receptionDate
-      : new Date().toISOString().split('T')[0]
-
-    const receptionNumber = receptionData.length > 0
-      ? receptionData[0].receptionNumber
-      : `Приемка-${Date.now()}`
-
-    const counterpartyName = receptionData.length > 0
-      ? receptionData[0].counterpartyName
-      : 'БЕС ООО'
-
-    const subdivisionName = receptionData.length > 0
-      ? receptionData[0].subdivisionName
-      : 'Основное подразделение'
+    const receptionDate = receptionData[0].receptionDate
+    const receptionNumber = receptionData[0].receptionNumber
+    const counterpartyName = receptionData[0].counterpartyName
+    const subdivisionName = receptionData[0].subdivisionName
+    const serviceName = receptionData[0].serviceName
 
     const newRow: ReceptionExcelRow = {
       receptionId: crypto.randomUUID(),
@@ -89,8 +86,8 @@ export const NewAcceptance: React.FC = () => {
       receptionNumber,
       counterpartyName,
       subdivisionName,
-      positionNumber: newPositionNumber,
-      serviceName: currentGroupName,
+      positionNumber: existingPositionNumber,
+      serviceName: serviceName,
       itemName: service.name,
       workGroup: currentGroupName,
       transactionType: service.transactionType,
@@ -125,13 +122,15 @@ export const NewAcceptance: React.FC = () => {
               Собранные Позиции
             </h2>
             <div className="flex items-center space-x-2">
-              <Button
-                variant="secondary"
-                onClick={handleAddGroupClick}
-              >
-                <Plus className="w-4 h-4 mr-1" />
-                Создать группу работ
-              </Button>
+              {receptionData.length > 0 && (
+                <Button
+                  variant="secondary"
+                  onClick={handleAddGroupClick}
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Создать группу работ
+                </Button>
+              )}
               <ReceptionExcelUploader
                 onDataUpload={handleDataUpload}
                 setLoading={setLoading}
