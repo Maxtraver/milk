@@ -28,9 +28,10 @@ export const AddServiceModal: React.FC<AddServiceModalProps> = ({
 
   const handleSave = () => {
     if (serviceName.trim() && pricePerUnit > 0 && quantity > 0) {
+      const finalPrice = transactionType === 'Расходы' ? -Math.abs(pricePerUnit) : Math.abs(pricePerUnit)
       onSave({
         name: serviceName.trim(),
-        pricePerUnit,
+        pricePerUnit: finalPrice,
         quantity,
         transactionType,
       })
