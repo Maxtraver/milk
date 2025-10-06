@@ -1,12 +1,14 @@
 import React, { useState } from 'react'
 import { AppLayout } from '../../components/Layout/AppLayout'
 import { Button } from '../../components/ui/Button'
-import { Download, Save } from 'lucide-react'
+import { Download, Save, Plus } from 'lucide-react'
 import { ReceptionExcelUploader } from '../../components/FinancialHierarchy/ReceptionExcelUploader'
 import { ReceptionPreview } from '../../components/FinancialHierarchy/ReceptionPreview'
 import { ReceptionExcelRow } from '../../utils/parseReceptionExcel'
 import { saveReceptionData } from '../../services/receptionService'
 import { Alert } from '../../components/ui/Alert'
+import { AddWorkGroupModal } from '../../components/FinancialHierarchy/AddWorkGroupModal'
+import { AddServiceModal } from '../../components/FinancialHierarchy/AddServiceModal'
 
 export const NewAcceptance: React.FC = () => {
   const [receptionData, setReceptionData] = useState<ReceptionExcelRow[]>([])
@@ -14,6 +16,9 @@ export const NewAcceptance: React.FC = () => {
   const [saving, setSaving] = useState(false)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [showAddGroupModal, setShowAddGroupModal] = useState(false)
+  const [showAddServiceModal, setShowAddServiceModal] = useState(false)
+  const [currentGroupName, setCurrentGroupName] = useState('')
 
   const handleDataUpload = (data: ReceptionExcelRow[]) => {
     setReceptionData(data)
@@ -42,6 +47,64 @@ export const NewAcceptance: React.FC = () => {
     }
   }
 
+  const handleAddGroupClick = () => {
+    setShowAddGroupModal(true)
+  }
+
+  const handleGroupNext = (groupName: string) => {
+    setCurrentGroupName(groupName)
+    setShowAddGroupModal(false)
+    setShowAddServiceModal(true)
+  }
+
+  const handleServiceSave = (service: {
+    name: string
+    pricePerUnit: number
+    quantity: number
+    transactionType: 'Доходы' | 'Расходы'
+  }) => {
+    const newPositionNumber = receptionData.length > 0
+      ? Math.max(...receptionData.map(item => item.positionNumber)) + 1
+      : 1
+
+    const receptionDate = receptionData.length > 0
+      ? receptionData[0].receptionDate
+      : new Date().toISOString().split('T')[0]
+
+    const receptionNumber = receptionData.length > 0
+      ? receptionData[0].receptionNumber
+      : `Приемка-${Date.now()}`
+
+    const counterpartyName = receptionData.length > 0
+      ? receptionData[0].counterpartyName
+      : 'БЕС ООО'
+
+    const subdivisionName = receptionData.length > 0
+      ? receptionData[0].subdivisionName
+      : 'Основное подразделение'
+
+    const newRow: ReceptionExcelRow = {
+      receptionId: crypto.randomUUID(),
+      receptionDate,
+      receptionNumber,
+      counterpartyName,
+      subdivisionName,
+      positionNumber: newPositionNumber,
+      serviceName: currentGroupName,
+      itemName: service.name,
+      workGroup: currentGroupName,
+      transactionType: service.transactionType,
+      price: service.pricePerUnit,
+      quantity: service.quantity,
+      motorInventoryNumber: '',
+    }
+
+    setReceptionData([...receptionData, newRow])
+    setShowAddServiceModal(false)
+    setCurrentGroupName('')
+    setSuccessMessage(`Добавлена новая позиция в группу "${currentGroupName}"`)
+  }
+
   return (
     <AppLayout
       title="Новая Приемка"
@@ -62,6 +125,13 @@ export const NewAcceptance: React.FC = () => {
               Собранные Позиции
             </h2>
             <div className="flex items-center space-x-2">
+              <Button
+                variant="secondary"
+                onClick={handleAddGroupClick}
+              >
+                <Plus className="w-4 h-4 mr-1" />
+                Создать группу работ
+              </Button>
               <ReceptionExcelUploader
                 onDataUpload={handleDataUpload}
                 setLoading={setLoading}
@@ -107,6 +177,22 @@ export const NewAcceptance: React.FC = () => {
             </Button>
           </div>
         )}
+
+        <AddWorkGroupModal
+          isOpen={showAddGroupModal}
+          onClose={() => setShowAddGroupModal(false)}
+          onNext={handleGroupNext}
+        />
+
+        <AddServiceModal
+          isOpen={showAddServiceModal}
+          onClose={() => {
+            setShowAddServiceModal(false)
+            setCurrentGroupName('')
+          }}
+          groupName={currentGroupName}
+          onSave={handleServiceSave}
+        />
       </div>
     </AppLayout>
   )
