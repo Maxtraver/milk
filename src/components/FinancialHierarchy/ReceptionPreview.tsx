@@ -1,10 +1,11 @@
 import React, { useState } from 'react'
 import { ReceptionExcelRow } from '../../utils/parseReceptionExcel'
-import { ChevronDown, ChevronRight, CreditCard as Edit2, Copy, Trash2 } from 'lucide-react'
+import { ChevronDown, ChevronRight, CreditCard as Edit2, Copy, Trash2, Plus } from 'lucide-react'
 
 interface ReceptionPreviewProps {
   data: ReceptionExcelRow[]
   onDataChange?: (data: ReceptionExcelRow[]) => void
+  onAddGroupClick?: () => void
 }
 
 interface PositionItemProps {
@@ -410,9 +411,10 @@ interface PositionGroupProps {
   onItemDelete?: (itemIndex: number) => void
   onServiceNameUpdate?: (newServiceName: string) => void
   onSubdivisionNameUpdate?: (newSubdivisionName: string) => void
+  onAddGroupClick?: () => void
 }
 
-const PositionGroup: React.FC<PositionGroupProps> = ({ positionNumber, items, onItemUpdate, onItemNameUpdate, onItemDelete, onServiceNameUpdate, onSubdivisionNameUpdate }) => {
+const PositionGroup: React.FC<PositionGroupProps> = ({ positionNumber, items, onItemUpdate, onItemNameUpdate, onItemDelete, onServiceNameUpdate, onSubdivisionNameUpdate, onAddGroupClick }) => {
   const [isExpanded, setIsExpanded] = useState(true)
   const [isEditingServiceName, setIsEditingServiceName] = useState(false)
   const [isEditingSubdivisionName, setIsEditingSubdivisionName] = useState(false)
@@ -591,13 +593,22 @@ const PositionGroup: React.FC<PositionGroupProps> = ({ positionNumber, items, on
               } : undefined}
             />
           ))}
+          {onAddGroupClick && (
+            <button
+              onClick={onAddGroupClick}
+              className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors mt-4"
+            >
+              <Plus size={16} />
+              Создать группу работ
+            </button>
+          )}
         </div>
       )}
     </div>
   )
 }
 
-export const ReceptionPreview: React.FC<ReceptionPreviewProps> = ({ data, onDataChange }) => {
+export const ReceptionPreview: React.FC<ReceptionPreviewProps> = ({ data, onDataChange, onAddGroupClick }) => {
   if (data.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500">
@@ -723,6 +734,7 @@ export const ReceptionPreview: React.FC<ReceptionPreviewProps> = ({ data, onData
             onItemDelete={onDataChange ? (idx) => handleItemDelete(positionNumber, idx) : undefined}
             onServiceNameUpdate={onDataChange ? (newServiceName) => handleServiceNameUpdate(positionNumber, newServiceName) : undefined}
             onSubdivisionNameUpdate={onDataChange ? (newSubdivisionName) => handleSubdivisionNameUpdate(positionNumber, newSubdivisionName) : undefined}
+            onAddGroupClick={onAddGroupClick}
           />
         ))}
       </div>

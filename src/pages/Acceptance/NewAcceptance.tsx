@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { AppLayout } from '../../components/Layout/AppLayout'
 import { Button } from '../../components/ui/Button'
-import { Download, Save, Plus } from 'lucide-react'
+import { Download, Save } from 'lucide-react'
 import { ReceptionExcelUploader } from '../../components/FinancialHierarchy/ReceptionExcelUploader'
 import { ReceptionPreview } from '../../components/FinancialHierarchy/ReceptionPreview'
 import { ReceptionExcelRow } from '../../utils/parseReceptionExcel'
@@ -121,21 +121,10 @@ export const NewAcceptance: React.FC = () => {
             <h2 className="text-xl font-semibold text-gray-800">
               Собранные Позиции
             </h2>
-            <div className="flex items-center space-x-2">
-              {receptionData.length > 0 && (
-                <Button
-                  variant="secondary"
-                  onClick={handleAddGroupClick}
-                >
-                  <Plus className="w-4 h-4 mr-1" />
-                  Создать группу работ
-                </Button>
-              )}
-              <ReceptionExcelUploader
-                onDataUpload={handleDataUpload}
-                setLoading={setLoading}
-              />
-            </div>
+            <ReceptionExcelUploader
+              onDataUpload={handleDataUpload}
+              setLoading={setLoading}
+            />
           </div>
 
           {loading ? (
@@ -144,7 +133,11 @@ export const NewAcceptance: React.FC = () => {
               <p className="mt-4 text-gray-600">Загрузка данных...</p>
             </div>
           ) : (
-            <ReceptionPreview data={receptionData} onDataChange={setReceptionData} />
+            <ReceptionPreview
+              data={receptionData}
+              onDataChange={setReceptionData}
+              onAddGroupClick={receptionData.length > 0 ? handleAddGroupClick : undefined}
+            />
           )}
         </div>
 
