@@ -6,6 +6,7 @@ interface ReceptionPreviewProps {
   data: ReceptionExcelRow[]
   onDataChange?: (data: ReceptionExcelRow[]) => void
   onAddGroupClick?: () => void
+  onDuplicatePosition?: (positionNumber: number) => void
 }
 
 interface PositionItemProps {
@@ -412,9 +413,10 @@ interface PositionGroupProps {
   onServiceNameUpdate?: (newServiceName: string) => void
   onSubdivisionNameUpdate?: (newSubdivisionName: string) => void
   onAddGroupClick?: () => void
+  onDuplicatePosition?: () => void
 }
 
-const PositionGroup: React.FC<PositionGroupProps> = ({ positionNumber, items, onItemUpdate, onItemNameUpdate, onItemDelete, onServiceNameUpdate, onSubdivisionNameUpdate, onAddGroupClick }) => {
+const PositionGroup: React.FC<PositionGroupProps> = ({ positionNumber, items, onItemUpdate, onItemNameUpdate, onItemDelete, onServiceNameUpdate, onSubdivisionNameUpdate, onAddGroupClick, onDuplicatePosition }) => {
   const [isExpanded, setIsExpanded] = useState(true)
   const [isEditingServiceName, setIsEditingServiceName] = useState(false)
   const [isEditingSubdivisionName, setIsEditingSubdivisionName] = useState(false)
@@ -593,15 +595,27 @@ const PositionGroup: React.FC<PositionGroupProps> = ({ positionNumber, items, on
               } : undefined}
             />
           ))}
-          {onAddGroupClick && (
-            <div className="mt-4 pl-3">
-              <button
-                onClick={onAddGroupClick}
-                className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors py-2"
-              >
-                <Plus size={16} />
-                Создать группу работ
-              </button>
+          {(onAddGroupClick || onDuplicatePosition) && (
+            <div className="mt-4 pl-3 flex items-center gap-4">
+              {onAddGroupClick && (
+                <button
+                  onClick={onAddGroupClick}
+                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors py-2"
+                >
+                  <Plus size={16} />
+                  Создать группу работ
+                </button>
+              )}
+              {onDuplicatePosition && (
+                <button
+                  onClick={onDuplicatePosition}
+                  className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors py-2"
+                  title="Продублировать позицию"
+                >
+                  <Copy size={16} />
+                  Продублировать позицию
+                </button>
+              )}
             </div>
           )}
         </div>
@@ -610,7 +624,7 @@ const PositionGroup: React.FC<PositionGroupProps> = ({ positionNumber, items, on
   )
 }
 
-export const ReceptionPreview: React.FC<ReceptionPreviewProps> = ({ data, onDataChange, onAddGroupClick }) => {
+export const ReceptionPreview: React.FC<ReceptionPreviewProps> = ({ data, onDataChange, onAddGroupClick, onDuplicatePosition }) => {
   if (data.length === 0) {
     return (
       <div className="text-center py-12 text-gray-500">
@@ -737,6 +751,7 @@ export const ReceptionPreview: React.FC<ReceptionPreviewProps> = ({ data, onData
             onServiceNameUpdate={onDataChange ? (newServiceName) => handleServiceNameUpdate(positionNumber, newServiceName) : undefined}
             onSubdivisionNameUpdate={onDataChange ? (newSubdivisionName) => handleSubdivisionNameUpdate(positionNumber, newSubdivisionName) : undefined}
             onAddGroupClick={onAddGroupClick}
+            onDuplicatePosition={onDuplicatePosition ? () => onDuplicatePosition(positionNumber) : undefined}
           />
         ))}
       </div>

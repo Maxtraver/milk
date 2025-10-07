@@ -102,6 +102,24 @@ export const NewAcceptance: React.FC = () => {
     setSuccessMessage(`Добавлена новая позиция в группу "${currentGroupName}"`)
   }
 
+  const handleDuplicatePosition = (positionNumber: number) => {
+    const positionItems = receptionData.filter(item => item.positionNumber === positionNumber)
+
+    if (positionItems.length === 0) return
+
+    const maxPositionNumber = Math.max(...receptionData.map(item => item.positionNumber))
+    const newPositionNumber = maxPositionNumber + 1
+
+    const duplicatedItems = positionItems.map(item => ({
+      ...item,
+      receptionId: crypto.randomUUID(),
+      positionNumber: newPositionNumber,
+    }))
+
+    setReceptionData([...receptionData, ...duplicatedItems])
+    setSuccessMessage(`Позиция ${positionNumber} продублирована как позиция ${newPositionNumber}`)
+  }
+
   return (
     <AppLayout
       title="Новая Приемка"
@@ -137,6 +155,7 @@ export const NewAcceptance: React.FC = () => {
               data={receptionData}
               onDataChange={setReceptionData}
               onAddGroupClick={receptionData.length > 0 ? handleAddGroupClick : undefined}
+              onDuplicatePosition={receptionData.length > 0 ? handleDuplicatePosition : undefined}
             />
           )}
         </div>
